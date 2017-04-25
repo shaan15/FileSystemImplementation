@@ -71,7 +71,21 @@ void read_data(int disk_id,int block_num,void *block){
 
 }
 
+void write_data_1(int disk_id,int block_num,void *block){
+    read_data(disk_id,data_bitmap_blockadd,data_bitmap);
+    fseek(fileid[disk_id],BLOCK_NUM*block_num,SEEK_SET);
+    fwrite(block,1,BLOCK_NUM,fileid[disk_id]);
+    // printf("%d\n",block_num );
+    if(data_bitmap[block_num]=='0')
+        data_bitmap[block_num]='1';
+    else
+        printf("%s\n","Data already exist" );
+    fseek(fileid[disk_id],BLOCK_NUM*data_bitmap_blockadd,SEEK_SET);
+    fwrite(data_bitmap,1,BLOCK_NUM,fileid[disk_id]);
+
+}
 void write_data(int disk_id,int block_num,void *block){
+    
     fseek(fileid[disk_id],BLOCK_NUM*block_num,SEEK_SET);
     fwrite(block,1,BLOCK_NUM,fileid[disk_id]);
 }
@@ -186,6 +200,11 @@ void print_FileList(int fid){
     char data_array[BLOCK_NUM];
 
     // read_data(fid,data_startaddress+i->data_pointers,data_array);
+    if(files[fid]->count_files==0)
+       {
+       printf("No files\n");
+       return;
+        }    
     int j;
     for(j=0; j<files[fid]->count_files; j++){
         printf("%s ",files[fid]->file_in_disk[j]);
@@ -209,6 +228,7 @@ int main(){
     }
 //printf("File created\n");
     char command[100];
+    printf("%s\n","Enter Command" );
     scanf("%s",command);
     while(strcmp(command,"exit")!=0){
         if(strcmp(command,"createSFS")==0){
@@ -224,7 +244,7 @@ int main(){
                         break;
                 // printf("%d\n",files[i]);
             }
-            printf("\n");
+            // printf("\n");
 
         }
 
@@ -245,7 +265,8 @@ int main(){
             printf("Enter Data (not space separated) to be written: ");
             char buffer[BLOCK_NUM+1];
             scanf ("%s", buffer);
-            write_data(did,blockNum,buffer);
+            // fgets (buffer, 100, stdin);
+            write_data_1(did,blockNum,buffer);
             //printf("%s\n", buffer);
             printf("Data block written\n");
             printf("\n");
@@ -304,8 +325,9 @@ int main(){
         }
         else{
              printf("Invalid command entered\n");
-             printf("\n");
+            
         }
+        printf("%s\n","Enter Command" );
         scanf("%s",command);
     }
     
